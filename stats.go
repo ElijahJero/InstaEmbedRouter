@@ -17,8 +17,8 @@ type promResponse struct {
 	Data   struct {
 		Result []struct {
 			Metric map[string]string `json:"metric"`
-			Value  []interface{}      `json:"value"`  // instant query: [timestamp, "value"]
-			Values [][]interface{}    `json:"values"` // range query: [][timestamp, "value"]
+			Value  []interface{}     `json:"value"`  // instant query: [timestamp, "value"]
+			Values [][]interface{}   `json:"values"` // range query: [][timestamp, "value"]
 		} `json:"result"`
 	} `json:"data"`
 }
