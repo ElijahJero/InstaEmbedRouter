@@ -10,15 +10,13 @@ import (
 	"time"
 )
 
-const prometheusURL = "http://localhost:9090"
-
 type promResponse struct {
 	Status string `json:"status"`
 	Data   struct {
 		Result []struct {
 			Metric map[string]string `json:"metric"`
-			Value  []interface{}      `json:"value"`  // instant query: [timestamp, "value"]
-			Values [][]interface{}    `json:"values"` // range query: [][timestamp, "value"]
+			Value  []interface{}     `json:"value"`  // instant query: [timestamp, "value"]
+			Values [][]interface{}   `json:"values"` // range query: [][timestamp, "value"]
 		} `json:"result"`
 	} `json:"data"`
 }
@@ -34,13 +32,13 @@ type seriesPoint struct {
 }
 
 func queryPrometheusInstant(promQuery string) (*promResponse, error) {
-	u := fmt.Sprintf("%s/api/v1/query?query=%s", prometheusURL, url.QueryEscape(promQuery))
+	u := fmt.Sprintf("%s/api/v1/query?query=%s", appConfig.PrometheusURL, url.QueryEscape(promQuery))
 	return doPromRequest(u)
 }
 
 func queryPrometheusRange(promQuery string, start, end time.Time, step string) (*promResponse, error) {
 	u := fmt.Sprintf("%s/api/v1/query_range?query=%s&start=%d&end=%d&step=%s",
-		prometheusURL, url.QueryEscape(promQuery), start.Unix(), end.Unix(), step)
+		appConfig.PrometheusURL, url.QueryEscape(promQuery), start.Unix(), end.Unix(), step)
 	return doPromRequest(u)
 }
 
@@ -81,6 +79,10 @@ func parseValue(raw []interface{}) float64 {
 
 // GET /api/stats/success -> total successful embeds per resolver (instaembed_resolver_success_total)
 func statsSuccessHandler(w http.ResponseWriter, r *http.Request) {
+	if !appConfig.statsEnabled() {
+		writeJSON(w, []statPoint{})
+		return
+	}
 	pr, err := queryPrometheusInstant("instaembed_resolver_success_total")
 	if err != nil {
 		errorLog.Printf("stats/success: %v", err)
@@ -100,6 +102,10 @@ func statsSuccessHandler(w http.ResponseWriter, r *http.Request) {
 
 // GET /api/stats/latency -> average latency per resolver over the last 24h, for resolvers that served traffic
 func statsLatencyHandler(w http.ResponseWriter, r *http.Request) {
+	if !appConfig.statsEnabled() {
+		writeJSON(w, []statPoint{})
+		return
+	}
 	query := `rate(instaembed_resolver_latency_seconds_sum[24h]) / (rate(instaembed_resolver_latency_seconds_count[24h])) and on(resolver) rate(instaembed_resolver_latency_seconds_count[24h]) > 0`
 	pr, err := queryPrometheusInstant(query)
 	if err != nil {
@@ -118,6 +124,10 @@ func statsLatencyHandler(w http.ResponseWriter, r *http.Request) {
 
 // GET /api/stats/requests-timeseries -> incoming requests per 10min bucket, over the last 24h
 func statsRequestsTimeseriesHandler(w http.ResponseWriter, r *http.Request) {
+	if !appConfig.statsEnabled() {
+		writeJSON(w, []seriesPoint{})
+		return
+	}
 	end := time.Now()
 	start := end.Add(-24 * time.Hour)
 	pr, err := queryPrometheusRange("increase(instaembed_requests_total[10m])", start, end, "10m")

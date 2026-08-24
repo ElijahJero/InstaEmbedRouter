@@ -7,8 +7,10 @@
 
 	<body>
 		<p>Service is running OK!</p>
-		<p>Add zz before instagram.com to fix embeds (https://<b>zz</b>instagram.com/p/{id} for example)</p>
+		<p>Use your configured proxy domain to fix embeds (for example <b>{{.ExampleURL}}</b>).</p>
+		<p>Configured hosts: root = <b>{{.BaseDomain}}</b>, normal = <b>{{.NormalHost}}</b>, gallery = <b>{{.GalleryHost}}</b>, direct = <b>{{.DirectHost}}</b>.</p>
 
+		{{if .StatsEnabled}}
 		<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
 			<div style="height: 300px;">
 				<canvas id="successChart"></canvas>
@@ -20,7 +22,11 @@
 				<canvas id="latencyChart"></canvas>
 			</div>
 		</div>
+		{{else}}
+		<p>Resolver charts are disabled because Prometheus is not configured.</p>
+		{{end}}
 
+		{{if .StatsEnabled}}
 		<script>
 			Chart.register(ChartDataLabels);
 
@@ -115,6 +121,7 @@
 			renderRequestsChart().catch(console.error);
 			renderLatencyChart().catch(console.error);
 		</script>
+		{{end}}
 	</body>
 
 </html>

@@ -180,11 +180,11 @@ func getRenderMode(req *http.Request, res Resolver) *RenderMode {
 	sub := getSubdomain(host)
 
 	switch sub {
-	case "g":
+	case appConfig.GallerySubdomain:
 		return res.Gallery
-	case "d":
+	case appConfig.DirectSubdomain:
 		return res.Direct
-	case "n":
+	case appConfig.NormalSubdomain:
 		return res.Normal
 	case "tst", "":
 		// subdomain used for tests only
@@ -194,7 +194,23 @@ func getRenderMode(req *http.Request, res Resolver) *RenderMode {
 }
 
 func getSubdomain(host string) string {
-	host = strings.Split(host, ":")[0]
+	host = strings.TrimSuffix(strings.ToLower(strings.Split(host, ":")[0]), ".")
+	if host == "" {
+		return ""
+	}
+	if appConfig.ProxyBaseDomain != "" {
+		if host == appConfig.ProxyBaseDomain {
+			return ""
+		}
+		suffix := "." + appConfig.ProxyBaseDomain
+		if strings.HasSuffix(host, suffix) {
+			subdomain := strings.TrimSuffix(host, suffix)
+			if subdomain == "www" {
+				return ""
+			}
+			return subdomain
+		}
+	}
 
 	parts := strings.Split(host, ".")
 	if len(parts) < 3 || parts[0] == "www" {
