@@ -14,6 +14,7 @@ import (
 )
 
 var errorLog = log.New(os.Stderr, "ERROR: ", log.LstdFlags)
+var appConfig Config
 
 var routes = []string{
 	"/p/{id}",
@@ -31,13 +32,13 @@ var routes = []string{
 }
 var defaultRes Resolver
 
-func startServer(resolvers []Resolver, port int) {
+func startServer(resolvers []Resolver, cfg Config) {
 	template := template.Must(template.ParseFiles("templates/index.html"))
 	// home page handler
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		template.Execute(w, "")
+		template.Execute(w, cfg.templateData())
 	})
 
 	for _, route := range routes {
@@ -51,7 +52,7 @@ func startServer(resolvers []Resolver, port int) {
 	mux.HandleFunc("GET /api/stats/latency", statsLatencyHandler)
 	mux.HandleFunc("GET /api/stats/requests-timeseries", statsRequestsTimeseriesHandler)
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), mux))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), mux))
 }
 
 func reqHandler(resolvers []Resolver) http.HandlerFunc {
@@ -82,14 +83,28 @@ func reqHandler(resolvers []Resolver) http.HandlerFunc {
 }
 
 func main() {
-	port := flag.Int("p", 8080, "port to run the server on")
+	port := flag.Int("p", envInt(8080, "PROXY_PORT", "PORT"), "port to run the server on")
+	proxyDomain := flag.String("proxy-domain", envHost("PROXY_BASE_DOMAIN", defaultProxyBaseDomain), "base domain used by this proxy")
+	normalSubdomain := flag.String("normal-subdomain", normalizeSubdomain(envString("PROXY_NORMAL_SUBDOMAIN", "n")), "subdomain used for normal embeds")
+	gallerySubdomain := flag.String("gallery-subdomain", normalizeSubdomain(envString("PROXY_GALLERY_SUBDOMAIN", "g")), "subdomain used for gallery embeds")
+	directSubdomain := flag.String("direct-subdomain", normalizeSubdomain(envString("PROXY_DIRECT_SUBDOMAIN", "d")), "subdomain used for direct embeds")
+	resolversFile := flag.String("resolvers-file", envString("RESOLVERS_FILE", "resolvers.json"), "path to the resolvers configuration file")
 	flag.Parse()
 	log.SetOutput(os.Stdout)
-	resolvers, err := loadResolvers("resolvers.json")
+	appConfig = Config{
+		Port:             *port,
+		ProxyBaseDomain:  normalizeHost(*proxyDomain),
+		NormalSubdomain:  normalizeSubdomain(*normalSubdomain),
+		GallerySubdomain: normalizeSubdomain(*gallerySubdomain),
+		DirectSubdomain:  normalizeSubdomain(*directSubdomain),
+		ResolversFile:    *resolversFile,
+	}
+	resolvers, err := loadResolvers(appConfig.ResolversFile)
 	if err != nil {
 		log.Fatalf("Error reading the file: %v", err)
 	}
+	applyResolverConfig(resolvers, appConfig)
 	metrics.Init()
 	go monitorResolvers(resolvers)
-	startServer(resolvers, *port)
+	startServer(resolvers, appConfig)
 }
