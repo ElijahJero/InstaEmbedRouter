@@ -4,5 +4,5 @@
   { "Url": "https://uuinstagram.com", "Normal": {}, "Direct": { "Query":  { "direct": "true" } }, "Gallery": { "Query":  { "gallery": "true" } } },
   { "Url": "https://fxstagram.com", "Normal": {}, "Direct": { "Query":  { "direct": "true" } }, "Gallery": { "Query":  { "gallery": "true" } } },
   { "Url": "https://kkinstagram.com", "Direct": {} },
-  { "Url": "https://instafix.{BASE_DOMAIN}", "Normal": {}, "Direct": { "Query":  { "direct": "true" } }, "Gallery": { "Query":  { "gallery": "true" } } }
+  { "Url": "https://instafix.zzinstagram.com", "Normal": {}, "Direct": { "Query":  { "direct": "true" } }, "Gallery": { "Query":  { "gallery": "true" } } }
 ]

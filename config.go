@@ -124,8 +124,5 @@ func applyResolverTokens(value string, cfg Config) string {
 	for token, replacement := range replacements {
 		value = strings.ReplaceAll(value, token, replacement)
 	}
-	if cfg.ProxyBaseDomain != defaultProxyBaseDomain && strings.HasSuffix(strings.ToLower(value), "."+defaultProxyBaseDomain) {
-		value = value[:len(value)-len("."+defaultProxyBaseDomain)] + "." + cfg.ProxyBaseDomain
-	}
 	return value
 }
