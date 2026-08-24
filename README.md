@@ -69,7 +69,7 @@ Or use Compose:
 docker compose up --build
 ```
 
-`PROMETHEUS_URL` is optional. When it is empty, the homepage hides the resolver charts instead of serving broken dashboard requests.
+`PROMETHEUS_URL` is optional and defaults to empty. When it is empty, the homepage hides the resolver charts instead of serving broken dashboard requests.
 
 ## Soft fork notes
 

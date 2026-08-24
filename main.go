@@ -88,7 +88,7 @@ func main() {
 	normalSubdomain := flag.String("normal-subdomain", normalizeSubdomain(envString("PROXY_NORMAL_SUBDOMAIN", "n")), "subdomain used for normal embeds")
 	gallerySubdomain := flag.String("gallery-subdomain", normalizeSubdomain(envString("PROXY_GALLERY_SUBDOMAIN", "g")), "subdomain used for gallery embeds")
 	directSubdomain := flag.String("direct-subdomain", normalizeSubdomain(envString("PROXY_DIRECT_SUBDOMAIN", "d")), "subdomain used for direct embeds")
-	prometheusURL := flag.String("prometheus-url", envOptionalString("PROMETHEUS_URL", "http://localhost:9090"), "Prometheus base URL for dashboard stats, empty disables the charts")
+	prometheusURL := flag.String("prometheus-url", envOptionalString("PROMETHEUS_URL", ""), "Prometheus base URL for dashboard stats, empty disables the charts")
 	resolversFile := flag.String("resolvers-file", envString("RESOLVERS_FILE", "resolvers.json"), "path to the resolvers configuration file")
 	flag.Parse()
 	log.SetOutput(os.Stdout)
