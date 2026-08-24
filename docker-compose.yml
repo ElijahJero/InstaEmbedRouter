@@ -10,3 +10,4 @@ services:
       PROXY_GALLERY_SUBDOMAIN: "media"
       PROXY_DIRECT_SUBDOMAIN: "raw"
       PROXY_NORMAL_SUBDOMAIN: "post"
+      PROMETHEUS_URL: ""

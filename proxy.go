@@ -204,7 +204,11 @@ func getSubdomain(host string) string {
 		}
 		suffix := "." + appConfig.ProxyBaseDomain
 		if strings.HasSuffix(host, suffix) {
-			return strings.TrimSuffix(host, suffix)
+			subdomain := strings.TrimSuffix(host, suffix)
+			if subdomain == "www" {
+				return ""
+			}
+			return subdomain
 		}
 	}
 

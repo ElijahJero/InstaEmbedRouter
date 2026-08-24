@@ -15,6 +15,7 @@ type Config struct {
 	NormalSubdomain  string
 	GallerySubdomain string
 	DirectSubdomain  string
+	PrometheusURL    string
 	ResolversFile    string
 }
 
@@ -24,6 +25,7 @@ type homePageData struct {
 	NormalHost       string
 	GalleryHost      string
 	DirectHost       string
+	StatsEnabled     bool
 	NormalSubdomain  string
 	GallerySubdomain string
 	DirectSubdomain  string
@@ -43,6 +45,14 @@ func envString(key, fallback string) string {
 		return fallback
 	}
 	return value
+}
+
+func envOptionalString(key, fallback string) string {
+	value, ok := os.LookupEnv(key)
+	if !ok {
+		return fallback
+	}
+	return strings.TrimSpace(value)
 }
 
 func envInt(fallback int, keys ...string) int {
@@ -92,10 +102,15 @@ func (c Config) templateData() homePageData {
 		NormalHost:       c.hostFor(c.NormalSubdomain),
 		GalleryHost:      c.hostFor(c.GallerySubdomain),
 		DirectHost:       c.hostFor(c.DirectSubdomain),
+		StatsEnabled:     c.statsEnabled(),
 		NormalSubdomain:  c.NormalSubdomain,
 		GallerySubdomain: c.GallerySubdomain,
 		DirectSubdomain:  c.DirectSubdomain,
 	}
+}
+
+func (c Config) statsEnabled() bool {
+	return strings.TrimSpace(c.PrometheusURL) != ""
 }
 
 func applyResolverConfig(resolvers []Resolver, cfg Config) {

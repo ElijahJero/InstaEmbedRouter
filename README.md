@@ -45,6 +45,7 @@ PROXY_BASE_DOMAIN=embeds.example.com
 PROXY_GALLERY_SUBDOMAIN=media
 PROXY_DIRECT_SUBDOMAIN=raw
 PROXY_NORMAL_SUBDOMAIN=post
+PROMETHEUS_URL=http://localhost:9090
 RESOLVERS_FILE=resolvers.json
 ```
 
@@ -67,6 +68,8 @@ Or use Compose:
 ```bash
 docker compose up --build
 ```
+
+`PROMETHEUS_URL` is optional. When it is empty, the homepage hides the resolver charts instead of serving broken dashboard requests.
 
 ## Soft fork notes
 
